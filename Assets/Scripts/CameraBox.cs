@@ -2,8 +2,8 @@ using UnityEngine;
 
 
 public class CameraBox : MonoBehaviour {
+    [HideInInspector][SerializeField] new Renderer renderer;
     public Vector3[] cameraPositions;
-    private MeshRenderer renderer;
     private Bounds bounds;
    private int width;
    private int height;
@@ -44,7 +44,7 @@ public class CameraBox : MonoBehaviour {
     private void Update() {
         
     }
-    
+
     private void OnDestroy() {
         this.cameraPositions = null;
     }

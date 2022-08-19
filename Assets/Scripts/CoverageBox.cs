@@ -2,9 +2,10 @@ using UnityEngine;
 
 public class CoverageBox : MonoBehaviour {
 
+    [HideInInspector][SerializeField] new Renderer renderer;
     private CullingGroup group;
     private BoundingSphere[] spheres;
-    private MeshRenderer renderer;
+
     private Bounds bounds;
    private int width;
    private int height;
@@ -14,7 +15,7 @@ public class CoverageBox : MonoBehaviour {
     private void Awake() {
         this.group = new CullingGroup();
         
-        renderer = GetComponent<MeshRenderer>();
+        this.renderer = GetComponent<MeshRenderer>();
         bounds = renderer.bounds;
 
         width = (int)(bounds.size.x * cellDensity);
