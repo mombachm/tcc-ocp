@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "prettier": "prettier --write '**/*.cs'"
+  },
+  "devDependencies": {
+    "prettier": "2.7.1",
+    "prettier-plugin-csharp": "0.6.0-development"
+  }
+}

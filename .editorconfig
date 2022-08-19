@@ -1,0 +1,4 @@
+# Code files
+[*.{cs,csx,vb,vbx}]
+indent_style = space
+indent_size = 2
