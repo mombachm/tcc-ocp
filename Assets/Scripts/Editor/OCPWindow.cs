@@ -26,8 +26,7 @@ public class MyWindow : EditorWindow
             this.createCoverageArea();
         }
         if(GUILayout.Button("Total Score")) {
-            Debug.Log("Count");
-            Debug.Log(GameObject.FindObjectOfType<CoverageBox>().GetComponent<CoverageBox>().getScore());
+          Debug.Log(MainController.showTotalCoverageScore());
         }
 
         // myString = EditorGUILayout.TextField ("Text Field", myString);
