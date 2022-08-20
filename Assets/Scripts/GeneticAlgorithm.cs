@@ -15,9 +15,9 @@ public class GeneticAlgorithm : MonoBehaviour
   {
 
   }
+
   private void OnDestroy()
   {
 
   }
-
 }

@@ -1,18 +1,27 @@
 using UnityEngine;
 
+
+
 public class CoverageBox : MonoBehaviour
 {
 
   [HideInInspector][SerializeField] new Renderer renderer;
+  public CoverageType type;
+  public int cellDensity;
   private CullingGroup group;
   private BoundingSphere[] spheres;
-
   private Bounds bounds;
   private int width;
   private int height;
   private int depth;
   private float cellDiameter;
-  public int cellDensity;
+
+  public enum CoverageType
+  {
+    Cover,
+    Avoid
+  }
+
   private void Awake()
   {
     this.group = new CullingGroup();
@@ -44,7 +53,7 @@ public class CoverageBox : MonoBehaviour
     this.group.targetCamera = Camera.main;
     this.group.SetBoundingSpheres(this.spheres);
     this.group.SetBoundingSphereCount(this.spheres.Length);
-    this.group.SetBoundingDistances(new float[] { 100f, 0f, 0f });
+    this.group.SetBoundingDistances(new float[] { 100f, 100f, 100f });
     this.group.SetDistanceReferencePoint(Camera.main.transform.position);
   }
 
@@ -84,5 +93,19 @@ public class CoverageBox : MonoBehaviour
     }
   }
 
+  public void setType(CoverageType type)
+  {
+    this.renderer = GetComponent<MeshRenderer>();
+    switch (type)
+    {
+      case CoverageType.Cover:
+        renderer.material = (Material)Resources.Load(path: "Blue", typeof(Material));
+        break;
+      case CoverageType.Avoid:
+        renderer.material = (Material)Resources.Load(path: "Yellow", typeof(Material));
+        break;
+    }
+    this.type = type;
+  }
 
 }
