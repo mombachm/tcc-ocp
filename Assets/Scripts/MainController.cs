@@ -15,7 +15,7 @@ public class MainController
         GeneticAlgorithm ga = new GeneticAlgorithm();
     }
 
-    public static float showTotalCoverageScore() {
-      return coverageService.getTotalCoverageScore();
+    public static CoverageData displayTotalCoverageData() {
+      return coverageService.getTotalCoverageData();
     }
 }

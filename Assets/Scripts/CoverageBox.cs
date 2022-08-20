@@ -1,7 +1,5 @@
 using UnityEngine;
 
-
-
 public class CoverageBox : MonoBehaviour
 {
 
@@ -108,11 +106,26 @@ public class CoverageBox : MonoBehaviour
     this.type = type;
   }
 
+  public CoverageData getCoverageData() {
+    CoverageData covData = new CoverageData();
+    float score = this.getScore();
+    float totalArea = this.getTotalArea();
+    covData.AreaCovered = (score * totalArea) / 100f;
+    covData.Score = score;
+    covData.TotalArea = totalArea;
+    return covData;
+  }
+
+  public float getTotalArea() {
+    Vector3 scale = this.transform.localScale;
+    return scale.x * scale.y * scale.z;
+  }
+
   public float getScore() {
     return getCoverageCount() * 100f / this.spheres.Length;
   }
 
-  public int getCoverageCount() {
+  private int getCoverageCount() {
     bool visible = true;
     if (this.type == CoverageType.Avoid) {
       visible = false;
