@@ -108,4 +108,12 @@ public class CoverageBox : MonoBehaviour
     this.type = type;
   }
 
+  public float getScore() {
+    return getCoverageCount() * 100f / this.spheres.Length;
+  }
+
+  public int getCoverageCount() {
+    return this.group.QueryIndices(true, null, 0);
+  }
+
 }

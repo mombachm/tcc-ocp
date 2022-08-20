@@ -25,7 +25,11 @@ public class MyWindow : EditorWindow
         if(GUILayout.Button("Coverage Area")) {
             this.createCoverageArea();
         }
-        
+        if(GUILayout.Button("Total Score")) {
+            Debug.Log("Count");
+            Debug.Log(GameObject.FindObjectOfType<CoverageBox>().GetComponent<CoverageBox>().getScore());
+        }
+
         // myString = EditorGUILayout.TextField ("Text Field", myString);
         // groupEnabled = EditorGUILayout.BeginToggleGroup ("Optional Settings", groupEnabled);
         //     myBool = EditorGUILayout.Toggle ("Toggle", myBool);
