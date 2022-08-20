@@ -113,7 +113,11 @@ public class CoverageBox : MonoBehaviour
   }
 
   public int getCoverageCount() {
-    return this.group.QueryIndices(true, null, 0);
+    bool visible = true;
+    if (this.type == CoverageType.Avoid) {
+      visible = false;
+    }
+    return this.group.QueryIndices(visible, null, 0);
   }
 
 }
