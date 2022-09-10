@@ -3,22 +3,20 @@ using GeneticSharp.Runner.UnityApp.Commons;
 
 public class CameraPhenotype : PhenotypeEntityBase
 {
-    public CameraPhenotype(Vector3 minPosition, Vector3 maxPosition)
+    public CameraPhenotype(int camPosLength)
     {
         Phenotypes = new IPhenotype[] {
-            new Phenotype("x", 5) { MinValue = minPosition.x, MaxValue = maxPosition.x },
-            new Phenotype("y", 5) { MinValue = minPosition.y, MaxValue = maxPosition.y },
-            new Phenotype("z", 5) { MinValue = minPosition.z, MaxValue = maxPosition.z },
+            new Phenotype("camPos", 15) {
+              MinValue = 0,
+              MaxValue = camPosLength - 1
+            }
         };
     }
 
-    public Vector3 Position
+    public int PositionIndex
     {
         get {
-            return new Vector3(
-                (float)Phenotypes[0].Value,
-                (float)Phenotypes[1].Value,
-                (float)Phenotypes[2].Value);
+          return (int)Phenotypes[0].Value;
         }
     }
 }

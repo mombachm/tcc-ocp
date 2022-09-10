@@ -22,6 +22,6 @@ public class CameraController : MonoBehaviour {
 
   public void setChromossome(CameraChromosome chromossome) {
     this.chromossome = chromossome;
-    this.transform.position = chromossome.GetPhenotypes()[0].Position;
+    this.transform.position = chromossome.CameraPosition;
   }
 }

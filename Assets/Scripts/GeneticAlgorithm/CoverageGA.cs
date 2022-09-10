@@ -7,11 +7,14 @@ using GeneticSharp.Domain.Populations;
 using GeneticSharp.Domain;
 using GeneticSharp.Domain.Terminations;
 using System.Collections;
+using GeneticSharp.Infrastructure.Framework.Threading;
+using System.Threading;
 
 public class CoverageGA : MonoBehaviour
 {
   private GeneticAlgorithm ga;
   private CoverageFitness fitness;
+  private Thread gaThread;
 
   private void Start() {
     Debug.Log("Initalizing Genetic Algorithm...");
@@ -20,37 +23,55 @@ public class CoverageGA : MonoBehaviour
     var crossover = new UniformCrossover();
     var mutation = new ReverseSequenceMutation();
     this.fitness = new CoverageFitness();
-    var chromosome = new CameraChromosome(new Vector3(0, 0, 0), new Vector3(1,1,1));
+    CameraAreaService cameraAreaService = new CameraAreaService();
+    var chromosome = new CameraChromosome(cameraAreaService.getAllPossiblePositions());
     var population = new Population (50, 70, chromosome);
 
     this.ga = new GeneticAlgorithm(population, this.fitness, selection, crossover, mutation);
-    this.ga.Termination = new GenerationNumberTermination(100);
+    this.ga.Termination = new GenerationNumberTermination(5);
     this.ga.GenerationRan += delegate
     {
         double score = ((CameraChromosome)this.ga.BestChromosome).Score;
         Debug.Log($"Generation: {this.ga.GenerationsNumber} - Score: ${score}");
     };
+
+    // this.ga.TaskExecutor = new ParallelTaskExecutor
+    //     {
+    //         MinThreads = 100,
+    //         MaxThreads = 200
+    //     };
+
     Debug.Log("GA running...");
-
-    CameraController cam = Camera.main.GetComponent<CameraController>();
-    cam.setChromossome(chromosome);
-
-    StartCoroutine(waiter());
+    this.gaThread = new Thread(() => this.ga.Start());
+    this.gaThread.Start();
+    //StartCoroutine(waiter());
   }
 
   IEnumerator waiter()
   {
       //Wait for 4 seconds
-      yield return new WaitForSeconds(4);
-      this.ga.Start();
+      yield return new WaitForSeconds(1);
+
   }
 
   void Update()
   {
-    CameraChromosome c;
-    this.fitness.ChromosomesToEvaluate.TryTake(out c);
-    CameraController cam = Camera.main.GetComponent<CameraController>();
-    cam.setChromossome(c);
+    if (this.ga.State == GeneticAlgorithmState.Started) {
+      CameraChromosome c;
+      if(this.fitness != null && this.fitness.ChromosomesToEvaluate.Count > 0) {
+        this.fitness.ChromosomesToEvaluate.TryTake(out c);
 
+        CameraController cam = Camera.main.GetComponent<CameraController>();
+        if (c != null) {
+          cam.setChromossome(c);
+        }
+      }
+    }
+  }
+
+  private void OnDestroy()
+  {
+      this.ga.Stop();
+      this.gaThread.Abort();
   }
 }

@@ -3,7 +3,6 @@ using UnityEngine;
 public class CoverageService
 {
     public CoverageService() {
-      Debug.Log("CONSTRUCTOR");
     }
 
     public CoverageData getTotalCoverageData()
