@@ -7,10 +7,19 @@ using GeneticSharp.Domain.Randomizations;
 public class CameraChromosome : BitStringChromosome<CameraPhenotype>
 {
   private Vector3[] possiblePositions;
-  public CameraChromosome(Vector3[] possiblePositions)
+  int[] panAngles;
+  int[] tiltAngles;
+
+  public CameraChromosome(Vector3[] possiblePositions, int[] panAngles, int[] tiltAngles)
   {
       this.possiblePositions = possiblePositions;
-      var phenotypes = new CameraPhenotype(this.possiblePositions.Length);
+      this.panAngles = panAngles;
+      this.tiltAngles = tiltAngles;
+      var phenotypes = new CameraPhenotype(
+        this.possiblePositions.Length, 
+        panAngles.Length,
+        tiltAngles.Length
+      );
       SetPhenotypes(phenotypes);
       CreateGenes();
   }
@@ -25,8 +34,24 @@ public class CameraChromosome : BitStringChromosome<CameraPhenotype>
     }
   }
 
+  public double PanAngle { 
+    get {
+      return this.panAngles[this.GetPhenotypes()[0].PanIndex];
+    }
+  }
+
+  public double TiltAngle { 
+    get {
+      return this.tiltAngles[this.GetPhenotypes()[0].TiltIndex];
+    }
+  }
+
   public override IChromosome CreateNew()
   {
-      return new CameraChromosome(this.possiblePositions);
+      return new CameraChromosome(
+        this.possiblePositions,
+        this.panAngles,
+        this.tiltAngles
+      );
   }
 }

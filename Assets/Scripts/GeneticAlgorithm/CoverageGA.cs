@@ -24,7 +24,12 @@ public class CoverageGA : MonoBehaviour
     var mutation = new ReverseSequenceMutation();
     this.fitness = new CoverageFitness();
     CameraAreaService cameraAreaService = new CameraAreaService();
-    var chromosome = new CameraChromosome(cameraAreaService.getAllPossiblePositions());
+    CameraConfigService cameraConfigService = new CameraConfigService();
+    var chromosome = new CameraChromosome(
+      cameraAreaService.getAllPossiblePositions(),
+      cameraConfigService.getPanAngles(),
+      cameraConfigService.getTiltAngles()
+    );
     var population = new Population (50, 70, chromosome);
 
     this.ga = new GeneticAlgorithm(population, this.fitness, selection, crossover, mutation);
@@ -34,7 +39,6 @@ public class CoverageGA : MonoBehaviour
         double score = ((CameraChromosome)this.ga.BestChromosome).Score;
         Debug.Log($"Generation: {this.ga.GenerationsNumber} - Score: ${score}");
     };
-
     // this.ga.TaskExecutor = new ParallelTaskExecutor
     //     {
     //         MinThreads = 100,
@@ -66,6 +70,14 @@ public class CoverageGA : MonoBehaviour
           cam.setChromossome(c);
         }
       }
+    } else if(this.ga.State == GeneticAlgorithmState.TerminationReached) {
+        double score = ((CameraChromosome)this.ga.BestChromosome).Score;
+        var bestChromosome = (CameraChromosome)this.ga.BestChromosome;
+        CameraController cam = Camera.main.GetComponent<CameraController>();
+        if (bestChromosome != null) {
+          cam.setChromossome(bestChromosome);
+        }
+        this.ga.Stop();
     }
   }
 

@@ -18,7 +18,7 @@ public class CoverageFitness : IFitness
 
     do
     {
-        Thread.Sleep(1);
+        //Thread.Sleep(100);
     } while (!c.Evaluated);
 
     return c.Score;

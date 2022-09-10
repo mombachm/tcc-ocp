@@ -23,5 +23,6 @@ public class CameraController : MonoBehaviour {
   public void setChromossome(CameraChromosome chromossome) {
     this.chromossome = chromossome;
     this.transform.position = chromossome.CameraPosition;
+    this.transform.rotation = Quaternion.Euler((float)chromossome.TiltAngle, (float)chromossome.PanAngle, this.transform.rotation.z);
   }
 }
