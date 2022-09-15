@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class CoverageService
 {
-    public CoverageService() {
-    }
+    public CoverageService() {}
 
     public CoverageData getTotalCoverageData()
     {

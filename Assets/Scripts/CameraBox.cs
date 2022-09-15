@@ -36,7 +36,6 @@ public class CameraBox : MonoBehaviour
         }
       }
     }
-    Camera.main.transform.position = this.cameraPositions[20];
   }
 
   private void Start()

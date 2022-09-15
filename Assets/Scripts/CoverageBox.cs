@@ -6,7 +6,7 @@ public class CoverageBox : MonoBehaviour
   [HideInInspector][SerializeField] new Renderer renderer;
   public CoverageType type;
   public int cellDensity;
-  private CullingGroup group;
+  private CullingGroup[] groups;
   private BoundingSphere[] spheres;
   private Bounds bounds;
   private int width;
@@ -22,7 +22,13 @@ public class CoverageBox : MonoBehaviour
 
   private void Awake()
   {
-    this.group = new CullingGroup();
+
+  }
+
+  private void Start()
+  {
+    Debug.Log($"CAMERAS COUNT: {Camera.allCamerasCount}");
+    this.groups = new CullingGroup[Camera.allCamerasCount];
 
     this.renderer = GetComponent<MeshRenderer>();
     bounds = renderer.bounds;
@@ -48,17 +54,18 @@ public class CoverageBox : MonoBehaviour
         }
       }
     }
-    this.group.targetCamera = Camera.main;
-    this.group.SetBoundingSpheres(this.spheres);
-    this.group.SetBoundingSphereCount(this.spheres.Length);
-    this.group.SetBoundingDistances(new float[] { 100f, 100f, 100f });
-    this.group.SetDistanceReferencePoint(Camera.main.transform.position);
-  }
 
-  private void Start()
-  {
-
-
+    for (int i = 0; i < Camera.allCamerasCount; i++) {
+      Camera camera = Camera.allCameras[i];
+      var camController = camera.GetComponent<CameraController>();
+      camController.setCamIndex(i);
+      this.groups[i] = new CullingGroup();
+      this.groups[i].targetCamera = camera;
+      this.groups[i].SetBoundingSpheres(this.spheres);
+      this.groups[i].SetBoundingSphereCount(this.spheres.Length);
+      this.groups[i].SetBoundingDistances(new float[] { 0, 10000f, 10000f });
+      this.groups[i].SetDistanceReferencePoint(camera.transform.position);
+    }
   }
 
   private void Update()
@@ -67,25 +74,31 @@ public class CoverageBox : MonoBehaviour
   }
   private void OnDestroy()
   {
-    this.group.Dispose();
-    this.group = null;
+    for (int i = 0; i < this.groups.Length; i++) {
+      this.groups[0].Dispose();
+      this.groups[0] = null;
+    }
   }
 
   private void OnDrawGizmos()
   {
+    if (!Constants.DRAW_GISMOS) return;
     if (this.spheres is not null)
     {
       for (int x = 0; x < width * height * depth; ++x)
       {
-        if (this.group.IsVisible(x))
-        {
-          Gizmos.color = Color.green;
-          Gizmos.DrawWireSphere(this.spheres[x].position, this.spheres[x].radius);
-        }
-        else
-        {
-          Gizmos.color = Color.red;
-          Gizmos.DrawWireSphere(this.spheres[x].position, this.spheres[x].radius);
+        //Gizmos.color = Color.red;
+        //Gizmos.DrawWireSphere(this.spheres[x].position, this.spheres[x].radius);
+        for (int i = 0; i < this.groups.Length; i++) {
+          if (this.groups[i].IsVisible(x))
+          {
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(this.spheres[x].position, this.spheres[x].radius);
+          }
+          else
+          {
+
+          }
         }
       }
     }
@@ -122,15 +135,18 @@ public class CoverageBox : MonoBehaviour
   }
 
   public float getScore() {
-    return getCoverageCount() * 100f / this.spheres.Length;
+    return getTotalCoverageCount() * 100f / this.spheres.Length;
   }
 
-  private int getCoverageCount() {
+  private float getTotalCoverageCount() {
     bool visible = true;
     if (this.type == CoverageType.Avoid) {
       visible = false;
     }
-    return this.group.QueryIndices(visible, null, 0);
+    int sumCoverageCount = 0;
+    for (int i = 0; i < this.groups.Length; i++) {
+      sumCoverageCount += this.groups[i].QueryIndices(visible, null, 0);
+    }
+    return (float)sumCoverageCount;
   }
-
 }

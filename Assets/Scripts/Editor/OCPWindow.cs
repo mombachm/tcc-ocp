@@ -25,11 +25,16 @@ public class MyWindow : EditorWindow
         if(GUILayout.Button("Coverage Area")) {
             this.createCoverageArea();
         }
+        if(GUILayout.Button(text: "Start/Restart GA")) {
+            var ga = GameObject.FindObjectOfType<CoverageGA>();
+            ga.startGA();
+        }
         if(GUILayout.Button("Total Score")) {
           Debug.Log("Area");
           Debug.Log(MainController.displayTotalCoverageData().Score);
         }
-
+        Constants.DRAW_GISMOS = EditorGUILayout.Toggle("Draw Coverage", Constants.DRAW_GISMOS);
+        
         // myString = EditorGUILayout.TextField ("Text Field", myString);
         // groupEnabled = EditorGUILayout.BeginToggleGroup ("Optional Settings", groupEnabled);
         //     myBool = EditorGUILayout.Toggle ("Toggle", myBool);

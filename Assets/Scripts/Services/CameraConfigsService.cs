@@ -27,4 +27,19 @@ public class CameraConfigService
       }
       return angles;
     }
+
+    public void instantiateCameras(int cameraCount) {
+      for (int i = 0; i < cameraCount; i++) {        
+        // CameraController newCam = Object.Instantiate(Camera.main.GetComponent<CameraController>(),  new Vector3(0, 0, 0), Quaternion.identity);
+        var cameraGameObject = new GameObject( $"GA cam {i}" );
+        cameraGameObject.gameObject.SetActive(true);
+        var newCam = cameraGameObject.AddComponent<Camera>();
+        newCam.gameObject.AddComponent<CameraController>();
+        newCam.nearClipPlane = 0.01f;
+        //newCam.usePhysicalProperties = true;
+        newCam.fieldOfView = 30;
+        newCam.useOcclusionCulling = true;
+      }
+      // Camera.main.enabled = false;
+    }
 }
