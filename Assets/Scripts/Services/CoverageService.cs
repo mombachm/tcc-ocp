@@ -8,9 +8,9 @@ public class CoverageService
     {
       float areaCov = 0.0f;
       float totalArea = 0.0f;
-      CoverageBox[] covBoxes = GameObject.FindObjectsOfType<CoverageBox>();
-      foreach (CoverageBox box in covBoxes) {
-        CoverageData boxCovData = box.GetComponent<CoverageBox>().getCoverageData();
+      CoverageBox2[] covBoxes = GameObject.FindObjectsOfType<CoverageBox2>();
+      foreach (CoverageBox2 box in covBoxes) {
+        CoverageData boxCovData = box.GetComponent<CoverageBox2>().getCoverageData();
         areaCov += boxCovData.AreaCovered;
         totalArea += boxCovData.TotalArea;
       }
