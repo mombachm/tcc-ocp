@@ -45,7 +45,6 @@ public class CoverageBox2 : MonoBehaviour
 
   private void Start()
   {
-    Debug.Log($"CAMERAS COUNT: {Camera.allCamerasCount}");
     this.groups = new CullingGroup[Camera.allCamerasCount];
 
     this.renderer = GetComponent<MeshRenderer>();
@@ -190,7 +189,7 @@ public class CoverageBox2 : MonoBehaviour
     //   sumCoverageCount += this.groups[i].QueryIndices(visible, null, 0);
     // }
     sumCoverageCount = this.cells.Count(c => c.Visible == visible);
-    Debug.Log($"VISIBLE CELLS COUNT: {sumCoverageCount}");
+    // Debug.Log($"VISIBLE CELLS COUNT: {sumCoverageCount}");
     return (float)sumCoverageCount;
   }
 }

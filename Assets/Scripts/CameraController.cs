@@ -11,33 +11,24 @@ public class CameraController : MonoBehaviour {
   }
 
   private void Update() {
-
+    checkCoverageScore(this.chromossome);
   }
 
-  private void checkCoverageScore() {
-    Debug.Log(message: $"CUR CAMERA POS: {this.transform.position} {this.transform.rotation}"); 
+  private void checkCoverageScore(CameraChromosome c) {
+    if (c == null || c.Evaluated == true) return;
     float score = coverageService.getTotalCoverageData().Score;
-    this.chromossome.Score = score;
-    Debug.Log($"SCORE: {score} CHROMO: {this.chromossome.CamerasSetup[0].Position} {this.chromossome.CamerasSetup[0].PanAngle} {this.chromossome.CamerasSetup[0].TiltAngle}");
-    this.chromossome.Evaluated = true;
+    c.Score = score;
+    //Debug.Log($"SCORE: {score} CHROMO: {c.CamerasSetup[this.index].Position} {c.CamerasSetup[this.index].PanAngle} {c.CamerasSetup[this.index].TiltAngle}");
+    c.Evaluated = true;
   }
 
   public void setChromossome(CameraChromosome chromossome) {
-    if (this.chromossome != null && this.chromossome.Evaluated == false) return;
+    if (chromossome == null) return;
     this.chromossome = chromossome;
     CameraSetup camSetup = chromossome.CamerasSetup[this.index];
-    Debug.Log(message: $"SETTING CAMERA POS: {camSetup.Position} {(float)camSetup.PanAngle} {(float)camSetup.TiltAngle}"); 
+    //Debug.Log(message: $"SETTING CAMERA POS: {camSetup.Position} {(float)camSetup.PanAngle} {(float)camSetup.TiltAngle}"); 
     this.transform.position = camSetup.Position;
     this.transform.rotation = Quaternion.Euler((float)camSetup.TiltAngle, (float)camSetup.PanAngle, 0);
-    StartCoroutine(waiter());
-  }
-
-  IEnumerator waiter()
-  {
-    yield return new WaitForEndOfFrame();
-    if (this.chromossome != null && !this.chromossome.Evaluated) {
-        checkCoverageScore();
-    }
   }
 
   public void setCamIndex(int index) {

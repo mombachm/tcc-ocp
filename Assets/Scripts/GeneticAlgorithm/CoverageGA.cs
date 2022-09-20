@@ -7,6 +7,7 @@ using GeneticSharp.Domain.Populations;
 using GeneticSharp.Domain;
 using GeneticSharp.Domain.Terminations;
 using System.Threading;
+using System.Collections;
 
 public class CoverageGA : MonoBehaviour
 {
@@ -14,6 +15,10 @@ public class CoverageGA : MonoBehaviour
   private CoverageFitness fitness;
   private Thread gaThread;
   private CameraConfigService cameraConfigService;
+
+  private CameraChromosome bestChromosome;
+
+  private CameraChromosome currentChromosome;
 
   private void Awake() {
     this.cameraConfigService = new CameraConfigService();
@@ -34,39 +39,32 @@ public class CoverageGA : MonoBehaviour
       this.cameraConfigService.getTiltAngles(),
       2
     );
-    var population = new Population (minSize: 50, 70, chromosome);
+    var population = new Population (minSize: 20, 50, chromosome);
 
     this.ga = new GeneticAlgorithm(population, this.fitness, selection, crossover, mutation);
-    this.ga.Termination = new GenerationNumberTermination(20);
+    this.ga.Termination = new GenerationNumberTermination(30);
     this.ga.GenerationRan += delegate
     {
         double score = ((CameraChromosome)this.ga.BestChromosome).Score;
-        Debug.Log($"Generation: {this.ga.GenerationsNumber} - Score: ${score}");
+        Debug.Log($"Generation: {this.ga.GenerationsNumber} - Score: ${score} | Population: {this.ga.ToString()}");
     };
-
-    Debug.Log("GA running..."); 
-    this.gaThread = new Thread(() => this.ga.Start());
   }
 
   void Update()
   {
+
     if (this.ga.State == GeneticAlgorithmState.Started) {
       CameraChromosome c;
-      if(this.fitness != null && this.fitness.ChromosomesToEvaluate.Count > 0) {
+      if(this.fitness != null && this.fitness.ChromosomesToEvaluate.Count > 0 && (this.currentChromosome == null || this.currentChromosome.Evaluated == true)) {
         this.fitness.ChromosomesToEvaluate.TryTake(out c);
         if (c != null) {
+          this.currentChromosome = c;
           setChromosomeInCameras(c);
         }
       }
-    } else if(this.ga.State == GeneticAlgorithmState.TerminationReached && this.ga.State != GeneticAlgorithmState.Stopped) {
-        Debug.Log("GA terminated..."); 
-        var bestChromosome = (CameraChromosome)this.ga.BestChromosome;
-        if (bestChromosome != null) {
-          Debug.Log($"Best chromossome: {bestChromosome.Fitness}"); 
-          setChromosomeInCameras(bestChromosome);
-        }
-        this.ga.Stop();
-        this.gaThread.Abort();
+    } else if (this.ga.State == GeneticAlgorithmState.TerminationReached && this.bestChromosome == null) {
+      Debug.Log("GA terminated..."); 
+      setBestChromosomeInScene();
     }
   }
 
@@ -78,9 +76,30 @@ public class CoverageGA : MonoBehaviour
     }
   }
 
+  public void setBestChromosomeInScene() {
+    var bestChromosome = (CameraChromosome)this.ga.BestChromosome;
+    if (bestChromosome != null) {
+      this.bestChromosome = bestChromosome;
+      Debug.Log($"Best chromossome: {this.bestChromosome.Fitness}"); 
+      setChromosomeInCameras(this.bestChromosome);
+    }
+  }
+
   public void startGA() {
-    if (this.gaThread.ThreadState == ThreadState.Unstarted) {
+    if (this.gaThread == null) {
+      this.bestChromosome = null;
+      this.gaThread = new Thread(() => this.ga.Start());
       this.gaThread.Start();
+      Debug.Log("GA running..."); 
+    }
+  }
+
+  public void stopGA() {
+    if (this.gaThread != null) {
+      this.ga.Stop();
+      this.gaThread.Abort();
+      this.gaThread = null;
+      Debug.Log("GA Stopped."); 
     }
   }
 

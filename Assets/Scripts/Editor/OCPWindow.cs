@@ -25,9 +25,17 @@ public class MyWindow : EditorWindow
         if(GUILayout.Button("Coverage Area")) {
             this.createCoverageArea();
         }
-        if(GUILayout.Button(text: "Start/Restart GA")) {
+        if(GUILayout.Button(text: "Start GA")) {
             var ga = GameObject.FindObjectOfType<CoverageGA>();
             ga.startGA();
+        }
+        if(GUILayout.Button(text: "Stop GA")) {
+            var ga = GameObject.FindObjectOfType<CoverageGA>();
+            ga.stopGA();
+        }
+        if(GUILayout.Button(text: "Set best chromosome in scene")) {
+            var ga = GameObject.FindObjectOfType<CoverageGA>();
+            ga.setBestChromosomeInScene();
         }
         if(GUILayout.Button("Total Score")) {
           Debug.Log("Area");

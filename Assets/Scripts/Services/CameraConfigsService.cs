@@ -37,8 +37,10 @@ public class CameraConfigService
         newCam.gameObject.AddComponent<CameraController>();
         newCam.nearClipPlane = 0.01f;
         //newCam.usePhysicalProperties = true;
-        newCam.fieldOfView = 30;
+        newCam.fieldOfView = Camera.HorizontalToVerticalFieldOfView(90, 16/9);
+        newCam.gateFit = Camera.GateFitMode.None;
         newCam.useOcclusionCulling = true;
+        newCam.targetDisplay = i;
       }
       // Camera.main.enabled = false;
     }

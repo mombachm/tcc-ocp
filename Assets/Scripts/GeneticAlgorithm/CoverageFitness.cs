@@ -16,10 +16,7 @@ public class CoverageFitness : IFitness
     CameraChromosome c = chromosome as CameraChromosome;
     ChromosomesToEvaluate.Add(c);
 
-    do
-    {
-        //Thread.Sleep(1); 
-    } while (!c.Evaluated);
+    do {} while (!c.Evaluated);
 
     return c.Score;
 	}
