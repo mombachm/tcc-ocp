@@ -11,13 +11,15 @@ public class CameraController : MonoBehaviour {
   }
 
   private void Update() {
-    checkCoverageScore(this.chromossome);
+    calculateChromossomeScore(this.chromossome);
   }
 
-  private void checkCoverageScore(CameraChromosome c) {
+  private void calculateChromossomeScore(CameraChromosome c) {
     if (c == null || c.Evaluated == true) return;
-    float score = coverageService.getTotalCoverageData().Score;
-    c.Score = score;
+    var covData = coverageService.getTotalCoverageData();
+    float w1 = 1f;
+    float w2 = 1;
+    c.Score = (covData.Score * w1) + ((100 / covData.avgCamDistance) * w2) ;
     //Debug.Log($"SCORE: {score} CHROMO: {c.CamerasSetup[this.index].Position} {c.CamerasSetup[this.index].PanAngle} {c.CamerasSetup[this.index].TiltAngle}");
     c.Evaluated = true;
   }

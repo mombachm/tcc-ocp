@@ -11,6 +11,7 @@ using System.Collections;
 
 public class CoverageGA : MonoBehaviour
 {
+  const int CAMERA_COUNT = 3;
   private GeneticAlgorithm ga;
   private CoverageFitness fitness;
   private Thread gaThread;
@@ -22,7 +23,7 @@ public class CoverageGA : MonoBehaviour
 
   private void Awake() {
     this.cameraConfigService = new CameraConfigService();
-    this.cameraConfigService.instantiateCameras(2);
+    this.cameraConfigService.instantiateCameras(CAMERA_COUNT);
   }
 
   private void Start() {
@@ -37,7 +38,7 @@ public class CoverageGA : MonoBehaviour
       cameraAreaService.getAllPossiblePositions(),
       this.cameraConfigService.getPanAngles(),
       this.cameraConfigService.getTiltAngles(),
-      2
+      CAMERA_COUNT
     );
     var population = new Population (minSize: 20, 50, chromosome);
 

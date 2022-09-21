@@ -15,6 +15,8 @@ public class Cell {
   public bool Visible { get; set; }
 
   public int VisibleCount { get; set; }
+
+  public float Distance { get; set; }
 }
 
 public class CoverageBox2 : MonoBehaviour
@@ -26,6 +28,8 @@ public class CoverageBox2 : MonoBehaviour
   public int cellDensity;
   private CullingGroup[] groups;
   private Cell[] cells;
+  private float[] camDistances;
+  private int[] camVisibleCount;
   private Bounds bounds;
   private int width;
   private int height;
@@ -45,8 +49,6 @@ public class CoverageBox2 : MonoBehaviour
 
   private void Start()
   {
-    this.groups = new CullingGroup[Camera.allCamerasCount];
-
     this.renderer = GetComponent<MeshRenderer>();
     this.covCollider = GetComponent<Collider>();
     this.covCollider.enabled = false;
@@ -75,13 +77,9 @@ public class CoverageBox2 : MonoBehaviour
       Camera camera = Camera.allCameras[i];
       var camController = camera.GetComponent<CameraController>();
       camController.setCamIndex(i);
-      // this.groups[i] = new CullingGroup();
-      // this.groups[i].targetCamera = camera;
-      // this.groups[i].SetBoundingSpheres(this.spheres);
-      // this.groups[i].SetBoundingSphereCount(this.spheres.Length);
-      // this.groups[i].SetBoundingDistances(new float[] { 0, 10000f, 10000f });
-      // this.groups[i].SetDistanceReferencePoint(camera.transform.position);
     }
+    this.camDistances = new float[Camera.allCamerasCount];
+    this.camVisibleCount = new int[Camera.allCamerasCount];
   }
 
   private void Update()
@@ -115,14 +113,16 @@ public class CoverageBox2 : MonoBehaviour
 
   private void verifyCoverageWithRayCasting() {
     if (this.cells is null) return;
-    for (int x = 0; x < width * height * depth; ++x) {
+    for (int x = 0; x < width * height * depth; x++) {
       this.cells[x].Visible = false;
       this.cells[x].VisibleCount = 0;
     }
     if (!this.renderer.isVisible) return;
     this.covCollider.enabled = true;
     for (int i = 0; i < Camera.allCamerasCount; i++) {
-      for (int x = 0; x < width * height * depth; ++x) {
+      this.camDistances[i] = 0;
+      this.camVisibleCount[i] = 0;
+      for (int x = 0; x < width * height * depth; x++) {
         Vector3 direction = this.cells[x].Position - Camera.allCameras[i].transform.position;
         bool isCellInFrustrum = IsCellVisibleFromCam(this.cells[x], Camera.allCameras[i]);
         if (isCellInFrustrum && Physics.Raycast(Camera.allCameras[i].transform.position, direction, out var raycastHit)) { // I forget actual racyast syntax/parameter order, check docs if this doesn't work
@@ -130,6 +130,8 @@ public class CoverageBox2 : MonoBehaviour
           if (raycastHit.collider.gameObject == this.gameObject) {
               this.cells[x].Visible = true;
               this.cells[x].VisibleCount = this.cells[x].VisibleCount + 1;
+              this.camDistances[i] += raycastHit.distance;
+              this.camVisibleCount[i]++;
           }
         }
         // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
@@ -160,11 +162,14 @@ public class CoverageBox2 : MonoBehaviour
   }
 
   public CoverageData getCoverageData() {
+    this.verifyCoverageWithRayCasting();
     CoverageData covData = new CoverageData();
     float score = this.getScore();
+    float avgCamDistance = this.getAverageDistanceToCam();
     float totalArea = this.getTotalArea();
     covData.AreaCovered = (score * totalArea) / 100f;
     covData.Score = score;
+    covData.avgCamDistance = avgCamDistance;
     covData.TotalArea = totalArea;
     return covData;
   }
@@ -174,8 +179,19 @@ public class CoverageBox2 : MonoBehaviour
     return scale.x * scale.y * scale.z;
   }
 
+  public float getAverageDistanceToCam() {
+    float avgDistance = 0;
+    int validCamCount = 0;
+    for (int i = 0; i < this.camDistances.Length; i++) {
+      if (this.camVisibleCount[i] > 0) {
+        avgDistance += (this.camDistances[i] / this.camVisibleCount[i]);
+        validCamCount++;
+      }
+    }
+    return avgDistance / validCamCount;
+  }
+
   public float getScore() {
-    this.verifyCoverageWithRayCasting();
     return getTotalCoverageCount() * 100f / this.cells.Length;
   }
 
@@ -185,11 +201,14 @@ public class CoverageBox2 : MonoBehaviour
       visible = false;
     }
     int sumCoverageCount = 0;
-    // for (int i = 0; i < this.groups.Length; i++) {
-    //   sumCoverageCount += this.groups[i].QueryIndices(visible, null, 0);
-    // }
     sumCoverageCount = this.cells.Count(c => c.Visible == visible);
-    // Debug.Log($"VISIBLE CELLS COUNT: {sumCoverageCount}");
     return (float)sumCoverageCount;
   }
+}
+
+public struct ScoreData
+{
+    public float Score;
+
+    public float AverageDistance;
 }

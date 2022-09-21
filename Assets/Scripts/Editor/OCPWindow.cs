@@ -38,8 +38,8 @@ public class MyWindow : EditorWindow
             ga.setBestChromosomeInScene();
         }
         if(GUILayout.Button("Total Score")) {
-          Debug.Log("Area");
-          Debug.Log(MainController.displayTotalCoverageData().Score);
+          CoverageData covData = MainController.displayTotalCoverageData();
+          Debug.Log($"COV SCORE: {covData.Score} / AVG DISTANCE: {covData.avgCamDistance} / CHROMO SCORE: {covData.Score + (100 / covData.avgCamDistance)}");
         }
         Constants.DRAW_GISMOS = EditorGUILayout.Toggle("Draw Coverage", Constants.DRAW_GISMOS);
         
