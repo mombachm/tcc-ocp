@@ -16,11 +16,13 @@ public class CameraController : MonoBehaviour {
 
   private void calculateChromossomeScore(CameraChromosome c) {
     if (c == null || c.Evaluated == true) return;
-    var covData = coverageService.getTotalCoverageData();
-    float w1 = 1f;
-    float w2 = 1;
-    c.Score = (covData.Score * w1) + ((100 / covData.avgCamDistance) * w2) ;
-    //Debug.Log($"SCORE: {score} CHROMO: {c.CamerasSetup[this.index].Position} {c.CamerasSetup[this.index].PanAngle} {c.CamerasSetup[this.index].TiltAngle}");
+    // var covData = coverageService.getTotalCoverageData();
+    // c.Score = (covData.Score * w1) + ((100 / covData.avgCamDistance) * w2) ;
+    TotalCoverageData totalCovData = coverageService.getTotalCoverageData();
+    c.PriorityCoverage = totalCovData.PriorityCoverage;
+    c.PrivacyCoverage = totalCovData.PrivacyCoverage;
+    c.Score = totalCovData.Score;
+    // Debug.Log($"SCORE: {score} CHROMO: {c.CamerasSetup[this.index].Position} {c.CamerasSetup[this.index].PanAngle} {c.CamerasSetup[this.index].TiltAngle}");
     c.Evaluated = true;
   }
 

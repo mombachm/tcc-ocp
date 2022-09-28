@@ -11,7 +11,7 @@ using System.Collections;
 
 public class CoverageGA : MonoBehaviour
 {
-  const int CAMERA_COUNT = 3;
+  const int CAMERA_COUNT = 2;
   private GeneticAlgorithm ga;
   private CoverageFitness fitness;
   private Thread gaThread;
@@ -31,7 +31,7 @@ public class CoverageGA : MonoBehaviour
 
     var selection = new EliteSelection();
     var crossover = new UniformCrossover();
-    var mutation = new ReverseSequenceMutation();
+    var mutation = new UniformMutation();
     this.fitness = new CoverageFitness();
     CameraAreaService cameraAreaService = new CameraAreaService();
     var chromosome = new CameraChromosome(
@@ -43,11 +43,17 @@ public class CoverageGA : MonoBehaviour
     var population = new Population (minSize: 20, 50, chromosome);
 
     this.ga = new GeneticAlgorithm(population, this.fitness, selection, crossover, mutation);
-    this.ga.Termination = new GenerationNumberTermination(30);
+    this.ga.Termination = new GenerationNumberTermination(50);
     this.ga.GenerationRan += delegate
     {
-        double score = ((CameraChromosome)this.ga.BestChromosome).Score;
-        Debug.Log($"Generation: {this.ga.GenerationsNumber} - Score: ${score} | Population: {this.ga.ToString()}");
+      var bestChromo = ((CameraChromosome)this.ga.Population.CurrentGeneration.BestChromosome);
+      Debug.Log($"Generation: {this.ga.GenerationsNumber} - Score: {bestChromo.Score}");
+      var generationData = new GenerationData();
+      generationData.bestScore = bestChromo.Score;
+      generationData.generationNumber = this.ga.GenerationsNumber;
+      generationData.bestPriorityCoverage = bestChromo.PriorityCoverage;
+      generationData.bestPrivacyCoverage = bestChromo.PrivacyCoverage;
+      LogService.generationData.Add(generationData);
     };
   }
 
@@ -65,6 +71,7 @@ public class CoverageGA : MonoBehaviour
       }
     } else if (this.ga.State == GeneticAlgorithmState.TerminationReached && this.bestChromosome == null) {
       Debug.Log("GA terminated..."); 
+      logBestChromosome();
       setBestChromosomeInScene();
     }
   }
@@ -77,11 +84,21 @@ public class CoverageGA : MonoBehaviour
     }
   }
 
-  public void setBestChromosomeInScene() {
+  public void logBestChromosome() {
     var bestChromosome = (CameraChromosome)this.ga.BestChromosome;
     if (bestChromosome != null) {
       this.bestChromosome = bestChromosome;
       Debug.Log($"Best chromossome: {this.bestChromosome.Fitness}"); 
+      LogService.bestPriorityCoverage = this.bestChromosome.PriorityCoverage;
+      LogService.bestPrivacyCoverage = this.bestChromosome.PrivacyCoverage;
+      LogService.logToCSV();
+    }
+  }
+
+  public void setBestChromosomeInScene() {
+    var bestChromosome = (CameraChromosome)this.ga.BestChromosome;
+    if (bestChromosome != null) {
+      this.bestChromosome = bestChromosome;
       setChromosomeInCameras(this.bestChromosome);
     }
   }

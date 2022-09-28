@@ -124,7 +124,6 @@ public class CoverageBox : MonoBehaviour
     float score = this.getScore();
     float totalArea = this.getTotalArea();
     covData.AreaCovered = (score * totalArea) / 100f;
-    covData.Score = score;
     covData.TotalArea = totalArea;
     return covData;
   }

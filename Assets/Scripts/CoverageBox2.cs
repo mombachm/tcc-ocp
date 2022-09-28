@@ -164,11 +164,11 @@ public class CoverageBox2 : MonoBehaviour
   public CoverageData getCoverageData() {
     this.verifyCoverageWithRayCasting();
     CoverageData covData = new CoverageData();
-    float score = this.getScore();
     float avgCamDistance = this.getAverageDistanceToCam();
     float totalArea = this.getTotalArea();
-    covData.AreaCovered = (score * totalArea) / 100f;
-    covData.Score = score;
+    float coverage = this.getCoverage();
+    covData.AreaCovered = (coverage * totalArea) / 100f;
+    covData.Coverage = coverage;
     covData.avgCamDistance = avgCamDistance;
     covData.TotalArea = totalArea;
     return covData;
@@ -191,17 +191,13 @@ public class CoverageBox2 : MonoBehaviour
     return avgDistance / validCamCount;
   }
 
-  public float getScore() {
-    return getTotalCoverageCount() * 100f / this.cells.Length;
+  public float getCoverage() {
+    return getCoverageCount() * 100f / this.cells.Length;
   }
 
-  private float getTotalCoverageCount() {
-    bool visible = true;
-    if (this.type == CoverageType.Avoid) {
-      visible = false;
-    }
+  private float getCoverageCount() {
     int sumCoverageCount = 0;
-    sumCoverageCount = this.cells.Count(c => c.Visible == visible);
+    sumCoverageCount = this.cells.Count(c => c.Visible == true);
     return (float)sumCoverageCount;
   }
 }

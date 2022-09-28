@@ -53,6 +53,9 @@ public class CameraChromosome : BitStringChromosome<CameraPhenotype>
   public bool Evaluated { get; set; }
   public double Score { get; set; }
 
+  public double PrivacyCoverage { get; set; }
+  public double PriorityCoverage { get; set; }
+
   public List<CameraSetup> CamerasSetup {
     get {
       var camerasSetup = new List<CameraSetup>();

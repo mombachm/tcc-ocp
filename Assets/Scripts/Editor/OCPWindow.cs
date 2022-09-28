@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class MyWindow : EditorWindow
 {   
-    public CoverageBox coverageBox;
+    public CoverageBox2 coverageBox;
     public CameraBox cameraBox;
 
     [MenuItem("Window/OCP")]
@@ -38,8 +38,10 @@ public class MyWindow : EditorWindow
             ga.setBestChromosomeInScene();
         }
         if(GUILayout.Button("Total Score")) {
-          CoverageData covData = MainController.displayTotalCoverageData();
-          Debug.Log($"COV SCORE: {covData.Score} / AVG DISTANCE: {covData.avgCamDistance} / CHROMO SCORE: {covData.Score + (100 / covData.avgCamDistance)}");
+          TotalCoverageData totalCovData = MainController.getTotalCoverageData();
+          Debug.Log($"COV SCORE: {totalCovData.Score} / AVG DISTANCE: {totalCovData.AvgCamDistance}");
+          Debug.Log($"COV PRIO: {totalCovData.PriorityCoverage}");
+          Debug.Log($"COV PRIV: {totalCovData.PrivacyCoverage}");
         }
         Constants.DRAW_GISMOS = EditorGUILayout.Toggle("Draw Coverage", Constants.DRAW_GISMOS);
         
@@ -51,7 +53,7 @@ public class MyWindow : EditorWindow
     }
 
     private void startBaseObjects() {
-      this.coverageBox = Utils.findInactiveObj<CoverageBox>();
+      this.coverageBox = Utils.findInactiveObj<CoverageBox2>();
       this.cameraBox = Utils.findInactiveObj<CameraBox>();
     }
 
@@ -62,15 +64,15 @@ public class MyWindow : EditorWindow
     }
 
     private void createAvoidedArea() {
-        CoverageBox newBox = Instantiate(this.coverageBox);
-        newBox.setType(CoverageBox.CoverageType.Avoid);
+        CoverageBox2 newBox = Instantiate(this.coverageBox);
+        newBox.setType(CoverageBox2.CoverageType.Avoid);
         newBox.gameObject.SetActive(true);
         newBox.transform.position = new Vector3(0, 0, 0);
     }
 
     private void createCoverageArea() {
-        CoverageBox newBox = Instantiate(this.coverageBox);
-        newBox.setType(CoverageBox.CoverageType.Cover);
+        CoverageBox2 newBox = Instantiate(this.coverageBox);
+        newBox.setType(CoverageBox2.CoverageType.Cover);
         newBox.gameObject.SetActive(true);
         newBox.transform.position = new Vector3(0, 0, 0);
     }
