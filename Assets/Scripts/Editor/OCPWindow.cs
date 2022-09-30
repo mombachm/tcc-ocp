@@ -44,8 +44,9 @@ public class MyWindow : EditorWindow
           Debug.Log($"COV PRIV: {totalCovData.PrivacyCoverage}");
         }
         Constants.DRAW_GISMOS = EditorGUILayout.Toggle("Draw Coverage", Constants.DRAW_GISMOS);
-        
-        // myString = EditorGUILayout.TextField ("Text Field", myString);
+        Constants.CELLS_DENSITY = int.Parse(EditorGUILayout.TextField ("Cells Density", Constants.CELLS_DENSITY.ToString()));
+        Constants.WEIGHT_PRIV = float.Parse(EditorGUILayout.TextField ("W - Avoid Areas", Constants.WEIGHT_PRIV.ToString()));
+        Constants.WEIGHT_PRI0 = float.Parse(EditorGUILayout.TextField ("W - Priority Areas", Constants.WEIGHT_PRI0.ToString()));
         // groupEnabled = EditorGUILayout.BeginToggleGroup ("Optional Settings", groupEnabled);
         //     myBool = EditorGUILayout.Toggle ("Toggle", myBool);
         //     myFloat = EditorGUILayout.Slider ("Slider", myFloat, -3, 3);

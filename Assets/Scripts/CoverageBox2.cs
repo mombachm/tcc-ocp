@@ -25,7 +25,7 @@ public class CoverageBox2 : MonoBehaviour
   [HideInInspector][SerializeField] new Renderer renderer;
   Collider covCollider;
   public CoverageType type;
-  public int cellDensity;
+  private int cellDensity;
   private CullingGroup[] groups;
   private Cell[] cells;
   private float[] camDistances;
@@ -49,29 +49,13 @@ public class CoverageBox2 : MonoBehaviour
 
   private void Start()
   {
+    this.cellDensity = Constants.CELLS_DENSITY;
     this.renderer = GetComponent<MeshRenderer>();
     this.covCollider = GetComponent<Collider>();
     this.covCollider.enabled = false;
     bounds = renderer.bounds;
 
-    width = (int)(bounds.size.x * cellDensity);
-    height = (int)(bounds.size.y * cellDensity);
-    depth = (int)(bounds.size.z * cellDensity);
-
-    cellDiameter = 1.0f / cellDensity;
-
-
-    this.cells = new Cell[width * height * depth];
-    for (int x = 0; x < width; ++x) {
-      for (int y = 0; y < height; ++y) {
-        for (int z = 0; z < depth; ++z)
-        {
-          Vector3 translate = transform.position - (bounds.size / 2) + new Vector3(cellDiameter / 2, cellDiameter / 2, cellDiameter / 2);
-          Vector3 pos = translate + new Vector3(x: (float)(x) / cellDensity, (float)(y) / cellDensity, (float)(z) / cellDensity);
-          this.cells[x + width * (y + height * z)] = new Cell(pos, cellDiameter / 2);
-        }
-      }
-    }
+    this.updateDimensions();
 
     for (int i = 0; i < Camera.allCamerasCount; i++) {
       Camera camera = Camera.allCameras[i];
@@ -84,7 +68,10 @@ public class CoverageBox2 : MonoBehaviour
 
   private void Update()
   {
-
+    if (this.cellDensity != Constants.CELLS_DENSITY) {
+      this.cellDensity = Constants.CELLS_DENSITY;
+      this.updateDimensions();
+    }
   }
   private void OnDestroy()
   {
@@ -107,6 +94,27 @@ public class CoverageBox2 : MonoBehaviour
               Gizmos.DrawWireSphere(this.cells[x].Position, this.cells[x].Radius);
           }
         // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
+      }
+    }
+  }
+
+  private void updateDimensions() {
+    width = (int)(bounds.size.x * cellDensity);
+    height = (int)(bounds.size.y * cellDensity);
+    depth = (int)(bounds.size.z * cellDensity);
+
+    cellDiameter = 1.0f / cellDensity;
+
+
+    this.cells = new Cell[width * height * depth];
+    for (int x = 0; x < width; ++x) {
+      for (int y = 0; y < height; ++y) {
+        for (int z = 0; z < depth; ++z)
+        {
+          Vector3 translate = transform.position - (bounds.size / 2) + new Vector3(cellDiameter / 2, cellDiameter / 2, cellDiameter / 2);
+          Vector3 pos = translate + new Vector3(x: (float)(x) / cellDensity, (float)(y) / cellDensity, (float)(z) / cellDensity);
+          this.cells[x + width * (y + height * z)] = new Cell(pos, cellDiameter / 2);
+        }
       }
     }
   }

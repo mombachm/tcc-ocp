@@ -28,7 +28,6 @@ public static class LogService
     }
 
     private static void logBestCoverages() {
-      //var newLine = string.Format("{0},{1}", first, second);
       string newLine = string.Format("MELHOR SCORE (FITNESS);{0}", bestScore);
       var newLine2 = string.Format("MELHOR COBERTURA (PRIORIDADE);{0}", bestPriorityCoverage);
       var newLine3 = string.Format("MELHOR COBERTURA (PRIVACIDADE);{0}", bestPrivacyCoverage);
@@ -38,9 +37,9 @@ public static class LogService
     }
 
     private static void logGenerationsData() {
-      csv.AppendLine(string.Format("\n\nGERAÇÃO;SCORE;MELHOR COBERTURA (PRIORIDADE);MELHOR COBERTURA (PRIVACIDADE)")); 
+      csv.AppendLine(string.Format("\n\nGERAÇÃO;W PRIO;W PRIV;SCORE;MELHOR COBERTURA (PRIORIDADE);MELHOR COBERTURA (PRIVACIDADE)")); 
       foreach (var genData in generationData) {
-        string newLine = string.Format("{0};{1};{2};{3}", genData.generationNumber, genData.bestScore, genData.bestPriorityCoverage, genData.bestPrivacyCoverage);
+        string newLine = string.Format("{0};{1};{2};{3};{4};{5}", genData.generationNumber, Constants.WEIGHT_PRIV, Constants.WEIGHT_PRI0, genData.bestScore, genData.bestPriorityCoverage, genData.bestPrivacyCoverage);
         csv.AppendLine(newLine);  
       }
     }

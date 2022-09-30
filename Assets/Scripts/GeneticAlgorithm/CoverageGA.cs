@@ -30,8 +30,9 @@ public class CoverageGA : MonoBehaviour
     Debug.Log("Initalizing Genetic Algorithm...");
 
     var selection = new EliteSelection();
+    var selection2 = new TournamentSelection();
     var crossover = new UniformCrossover();
-    var mutation = new UniformMutation();
+    var mutation = new FlipBitMutation();
     this.fitness = new CoverageFitness();
     CameraAreaService cameraAreaService = new CameraAreaService();
     var chromosome = new CameraChromosome(
@@ -40,10 +41,13 @@ public class CoverageGA : MonoBehaviour
       this.cameraConfigService.getTiltAngles(),
       CAMERA_COUNT
     );
-    var population = new Population (minSize: 20, 50, chromosome);
+    var population = new Population (minSize: 100, 200, chromosome);
 
-    this.ga = new GeneticAlgorithm(population, this.fitness, selection, crossover, mutation);
-    this.ga.Termination = new GenerationNumberTermination(50);
+    this.ga = new GeneticAlgorithm(population, this.fitness, selection2, crossover, mutation);
+    this.ga.Termination = new FitnessStagnationTermination(10); 
+    // new FitnessThresholdTermination(100);//new GenerationNumberTermination(20);
+
+
     this.ga.GenerationRan += delegate
     {
       var bestChromo = ((CameraChromosome)this.ga.Population.CurrentGeneration.BestChromosome);

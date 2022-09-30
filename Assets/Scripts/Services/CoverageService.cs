@@ -50,6 +50,6 @@ public class CoverageService
     }
 
     private float calculateScore(TotalCoverageData covData) {
-      return covData.PriorityCoverage - covData.PrivacyCoverage;
+      return (covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
     }
 }
