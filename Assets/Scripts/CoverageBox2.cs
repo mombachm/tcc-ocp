@@ -49,7 +49,7 @@ public class CoverageBox2 : MonoBehaviour
 
   private void Start()
   {
-    this.cellDensity = Constants.CELLS_DENSITY;
+    this.cellDensity = Constants.CAM_CELLS_DENSITY;
     this.renderer = GetComponent<MeshRenderer>();
     this.covCollider = GetComponent<Collider>();
     this.covCollider.enabled = false;
@@ -72,6 +72,12 @@ public class CoverageBox2 : MonoBehaviour
       this.cellDensity = Constants.CELLS_DENSITY;
       this.updateDimensions();
     }
+    if (this.type == CoverageType.Cover && this.renderer.enabled != Constants.SHOW_COV_AREAS) {
+      this.renderer.enabled = !this.renderer.enabled;
+    }
+    if (this.type == CoverageType.Avoid && this.renderer.enabled != Constants.SHOW_PRIV_AREAS) {
+      this.renderer.enabled = !this.renderer.enabled;
+    }
   }
   private void OnDestroy()
   {
@@ -80,21 +86,25 @@ public class CoverageBox2 : MonoBehaviour
 
   private void OnDrawGizmos()
   {
+    if (!Constants.DRAW_GISMOS || !this.renderer.enabled) return;
     if (!Constants.DRAW_GISMOS) return;
     if (this.cells is null) return;
     this.verifyCoverageWithRayCasting();
+    // var cellSize = new Vector3(cellDiameter, cellDiameter, cellDiameter);
     for (int x = 0; x < width * height * depth; ++x) {
-      for (int i = 0; i < Camera.allCamerasCount; i++) {
+      //for (int i = 0; i < Camera.allCamerasCount; i++) {
           // Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
           if (this.cells[x].Visible) {
               Gizmos.color = Color.green;
-              Gizmos.DrawWireSphere(this.cells[x].Position, this.cells[x].Radius);
+              //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
+              Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
           } else {
               Gizmos.color = Color.red;
-              Gizmos.DrawWireSphere(this.cells[x].Position, this.cells[x].Radius);
+              //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
+              Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
           }
         // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
-      }
+      //}
     }
   }
 
@@ -133,13 +143,15 @@ public class CoverageBox2 : MonoBehaviour
       for (int x = 0; x < width * height * depth; x++) {
         Vector3 direction = this.cells[x].Position - Camera.allCameras[i].transform.position;
         bool isCellInFrustrum = IsCellVisibleFromCam(this.cells[x], Camera.allCameras[i]);
-        if (isCellInFrustrum && Physics.Raycast(Camera.allCameras[i].transform.position, direction, out var raycastHit)) { // I forget actual racyast syntax/parameter order, check docs if this doesn't work
+        if (isCellInFrustrum) {
+          if (Physics.Raycast(Camera.allCameras[i].transform.position, direction, out var raycastHit)) {
           //Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
-          if (raycastHit.collider.gameObject == this.gameObject) {
-              this.cells[x].Visible = true;
-              this.cells[x].VisibleCount = this.cells[x].VisibleCount + 1;
-              this.camDistances[i] += raycastHit.distance;
-              this.camVisibleCount[i]++;
+            if (raycastHit.collider.gameObject == this.gameObject) {
+                this.cells[x].Visible = true;
+                this.cells[x].VisibleCount = this.cells[x].VisibleCount + 1;
+                this.camDistances[i] += raycastHit.distance;
+                this.camVisibleCount[i]++;
+            }
           }
         }
         // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
@@ -175,8 +187,11 @@ public class CoverageBox2 : MonoBehaviour
     float avgCamDistance = this.getAverageDistanceToCam();
     float totalArea = this.getTotalArea();
     float coverage = this.getCoverage();
-    covData.AreaCovered = (coverage * totalArea) / 100f;
+    float multiCoverage = this.getMultiCoverage();
     covData.Coverage = coverage;
+    covData.AreaCovered = (coverage * totalArea) / 100f;
+    covData.MultiCoverage = multiCoverage;
+    covData.AreaMultiCovered = (multiCoverage * totalArea) / 100f;
     covData.avgCamDistance = avgCamDistance;
     covData.TotalArea = totalArea;
     return covData;
@@ -203,9 +218,19 @@ public class CoverageBox2 : MonoBehaviour
     return getCoverageCount() * 100f / this.cells.Length;
   }
 
+  public float getMultiCoverage() {
+    return getMultiCoverageCount() * 100f / this.cells.Length;
+  }
+
   private float getCoverageCount() {
     int sumCoverageCount = 0;
     sumCoverageCount = this.cells.Count(c => c.Visible == true);
+    return (float)sumCoverageCount;
+  }
+
+  private float getMultiCoverageCount() {
+    int sumCoverageCount = 0;
+    sumCoverageCount = this.cells.Count(c => c.VisibleCount > 1);
     return (float)sumCoverageCount;
   }
 }

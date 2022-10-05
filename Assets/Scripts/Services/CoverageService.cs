@@ -6,6 +6,7 @@ public struct TotalCoverageData
 
     public float Score;
     public float PriorityCoverage;
+    public float MultiPriorityCoverage;
     public float PrivacyCoverage;
     public float AvgCamDistance;
 }
@@ -17,6 +18,7 @@ public class CoverageService
     public TotalCoverageData getTotalCoverageData()
     {
       float prioAreaCov = 0.0f;
+      float multiPrioAreaCov = 0.0f;
       float totalPrioArea = 0.0f;
       float totalCamDistanceAvg = 0.0f;
       int countPriorityAreas = 0;
@@ -27,6 +29,7 @@ public class CoverageService
         CoverageData boxCovData = box.GetComponent<CoverageBox2>().getCoverageData();
         if (box.type == CoverageBox2.CoverageType.Cover) {
           prioAreaCov += boxCovData.AreaCovered;
+          multiPrioAreaCov += boxCovData.AreaMultiCovered;
           totalPrioArea += boxCovData.TotalArea;
           if (boxCovData.avgCamDistance > 0) {
             countPriorityAreas++;
@@ -38,11 +41,18 @@ public class CoverageService
         }
       }
       float totalPrioCoverage = (prioAreaCov / totalPrioArea) * 100;
+      float totalPrioMultiCoverage = (multiPrioAreaCov / totalPrioArea) * 100;
       float totalPrivCoverage = (privAreaCov / totalPrivArea) * 100;
+      if (totalPrivArea == 0.0f) totalPrivCoverage = 0;
+      if (totalPrioArea == 0.0f) {
+        totalPrivCoverage = 0;
+        totalPrioMultiCoverage = 0;
+      }
       TotalCoverageData covData = new TotalCoverageData();
       // covData.TotalArea = totalPrioArea;
       // covData.AreaCovered = areaCov;
       covData.PriorityCoverage = totalPrioCoverage;
+      covData.MultiPriorityCoverage = totalPrioMultiCoverage;
       covData.PrivacyCoverage = totalPrivCoverage;
       covData.AvgCamDistance = totalCamDistanceAvg / countPriorityAreas;
       covData.Score = this.calculateScore(covData);
@@ -50,6 +60,6 @@ public class CoverageService
     }
 
     private float calculateScore(TotalCoverageData covData) {
-      return (covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
+      return (covData.MultiPriorityCoverage * 0.2f + covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
     }
 }

@@ -10,17 +10,56 @@ public class CameraBox : MonoBehaviour
   private int height;
   private int depth;
   private float cellDiameter;
-  public int cellDensity;
+  private int cellDensity;
   private void Awake()
   {
-    renderer = GetComponent<MeshRenderer>();
-    bounds = renderer.bounds;
+    this.cellDensity = Constants.CELLS_DENSITY;
+    this.renderer = GetComponent<MeshRenderer>();
+    this.bounds = renderer.bounds;
+    this.updateDimensions();
+  }
 
-    width = (int)(bounds.size.x * cellDensity + 1);
-    height = (int)(bounds.size.y * cellDensity + 1);
-    depth = (int)(bounds.size.z * cellDensity + 1);
+  private void Start()
+  {
 
-    cellDiameter = 1.0f / cellDensity;
+  }
+
+  private void Update()
+  {
+    if (this.cellDensity != Constants.CAM_CELLS_DENSITY) {
+      this.cellDensity = Constants.CAM_CELLS_DENSITY;
+      this.updateDimensions();
+    }
+    if (this.renderer.enabled != Constants.SHOW_CAM_AREAS) {
+      this.renderer.enabled = !this.renderer.enabled;
+    }
+  }
+
+  private void OnDestroy()
+  {
+    this.cameraPositions = null;
+  }
+
+  private void OnDrawGizmos()
+  {
+    if (!this.renderer) return;
+    if (!Constants.DRAW_GISMOS || !this.renderer.enabled) return;
+    if (this.cameraPositions is not null)
+    {
+      for (int x = 0; x < width * height * depth; ++x)
+      {
+        Gizmos.color = Color.magenta;
+        Gizmos.DrawWireSphere(this.cameraPositions[x], .05f);
+      }
+    }
+  }
+
+  private void updateDimensions() {
+    this.width = (int)(bounds.size.x * this.cellDensity + 1);
+    this.height = (int)(bounds.size.y * this.cellDensity + 1);
+    this.depth = (int)(bounds.size.z * this.cellDensity + 1);
+
+    this.cellDiameter = 1.0f / this.cellDensity;
 
     this.cameraPositions = new Vector3[width * height * depth];
     for (int x = 0; x < width; ++x)
@@ -37,33 +76,4 @@ public class CameraBox : MonoBehaviour
       }
     }
   }
-
-  private void Start()
-  {
-
-  }
-
-  private void Update()
-  {
-
-  }
-
-  private void OnDestroy()
-  {
-    this.cameraPositions = null;
-  }
-
-  private void OnDrawGizmos()
-  {
-    if (this.cameraPositions is not null)
-    {
-      for (int x = 0; x < width * height * depth; ++x)
-      {
-        Gizmos.color = Color.magenta;
-        Gizmos.DrawWireSphere(this.cameraPositions[x], .05f);
-      }
-    }
-  }
-
-
 }

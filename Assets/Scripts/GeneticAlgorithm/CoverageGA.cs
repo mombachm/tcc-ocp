@@ -8,10 +8,11 @@ using GeneticSharp.Domain;
 using GeneticSharp.Domain.Terminations;
 using System.Threading;
 using System.Collections;
+using GeneticSharp.Infrastructure.Framework.Threading;
 
 public class CoverageGA : MonoBehaviour
 {
-  const int CAMERA_COUNT = 2;
+  const int CAMERA_COUNT = 7;
   private GeneticAlgorithm ga;
   private CoverageFitness fitness;
   private Thread gaThread;
@@ -24,6 +25,7 @@ public class CoverageGA : MonoBehaviour
   private void Awake() {
     this.cameraConfigService = new CameraConfigService();
     this.cameraConfigService.instantiateCameras(CAMERA_COUNT);
+    Utils.disableGlassColliders();
   }
 
   private void Start() {
@@ -41,9 +43,10 @@ public class CoverageGA : MonoBehaviour
       this.cameraConfigService.getTiltAngles(),
       CAMERA_COUNT
     );
-    var population = new Population (minSize: 100, 200, chromosome);
+    var population = new Population (minSize: 100, 100, chromosome);
 
     this.ga = new GeneticAlgorithm(population, this.fitness, selection2, crossover, mutation);
+    this.ga.MutationProbability = 0.2f;
     this.ga.Termination = new FitnessStagnationTermination(10); 
     // new FitnessThresholdTermination(100);//new GenerationNumberTermination(20);
 

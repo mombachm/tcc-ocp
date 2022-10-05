@@ -41,10 +41,15 @@ public class MyWindow : EditorWindow
           TotalCoverageData totalCovData = MainController.getTotalCoverageData();
           Debug.Log($"COV SCORE: {totalCovData.Score} / AVG DISTANCE: {totalCovData.AvgCamDistance}");
           Debug.Log($"COV PRIO: {totalCovData.PriorityCoverage}");
+          Debug.Log($"COV MULTI PRIO: {totalCovData.MultiPriorityCoverage}");
           Debug.Log($"COV PRIV: {totalCovData.PrivacyCoverage}");
         }
         Constants.DRAW_GISMOS = EditorGUILayout.Toggle("Draw Coverage", Constants.DRAW_GISMOS);
+        Constants.SHOW_COV_AREAS = EditorGUILayout.Toggle("Show/Hide Coverage Areas", Constants.SHOW_COV_AREAS);
+        Constants.SHOW_PRIV_AREAS = EditorGUILayout.Toggle("Show/Hide Privacy Areas", Constants.SHOW_PRIV_AREAS);
+        Constants.SHOW_CAM_AREAS = EditorGUILayout.Toggle("Show/Hide Camera Areas", Constants.SHOW_CAM_AREAS);
         Constants.CELLS_DENSITY = int.Parse(EditorGUILayout.TextField ("Cells Density", Constants.CELLS_DENSITY.ToString()));
+        Constants.CAM_CELLS_DENSITY = int.Parse(EditorGUILayout.TextField ("Cam Cells Density", Constants.CAM_CELLS_DENSITY.ToString()));
         Constants.WEIGHT_PRIV = float.Parse(EditorGUILayout.TextField ("W - Avoid Areas", Constants.WEIGHT_PRIV.ToString()));
         Constants.WEIGHT_PRI0 = float.Parse(EditorGUILayout.TextField ("W - Priority Areas", Constants.WEIGHT_PRI0.ToString()));
         // groupEnabled = EditorGUILayout.BeginToggleGroup ("Optional Settings", groupEnabled);

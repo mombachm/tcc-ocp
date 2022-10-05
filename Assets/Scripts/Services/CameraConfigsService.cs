@@ -5,8 +5,8 @@ public class CameraConfigService
 {
     const int MIN_PAN = 0;
     const int MAX_PAN = 359;
-    const int MIN_TILT = 0;
-    const int MAX_TILT = 90;
+    const int MIN_TILT = 10;
+    const int MAX_TILT = 70;
     const int ANGLE_STEP = 1;
 
     public CameraConfigService() {}
