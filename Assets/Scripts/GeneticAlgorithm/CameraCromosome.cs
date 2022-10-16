@@ -31,6 +31,7 @@ public class CameraChromosome : BitStringChromosome<CameraPhenotype>
 
   public CameraChromosome(Vector3[] possiblePositions, int[] panAngles, int[] tiltAngles, int cameraCount)
   {
+      this.Score = double.NaN;
       this.possiblePositions = possiblePositions;
       this.panAngles = panAngles;
       this.tiltAngles = tiltAngles;
@@ -55,6 +56,7 @@ public class CameraChromosome : BitStringChromosome<CameraPhenotype>
 
   public double PrivacyCoverage { get; set; }
   public double PriorityCoverage { get; set; }
+  public double MultiPriorityCoverage { get; set; }
 
   public List<CameraSetup> CamerasSetup {
     get {
@@ -72,11 +74,11 @@ public class CameraChromosome : BitStringChromosome<CameraPhenotype>
 
   public override IChromosome CreateNew()
   {
-      return new CameraChromosome(
-        this.possiblePositions,
-        this.panAngles,
-        this.tiltAngles,
-        this.cameraCount
-      );
+    return new CameraChromosome(
+      this.possiblePositions,
+      this.panAngles,
+      this.tiltAngles,
+      this.cameraCount
+    );
   }
 }

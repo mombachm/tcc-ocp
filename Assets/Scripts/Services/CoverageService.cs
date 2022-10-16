@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Threading.Tasks;
 using UnityEngine;
 
 public struct TotalCoverageData
@@ -13,10 +15,12 @@ public struct TotalCoverageData
 
 public class CoverageService
 {
+    private Stopwatch stopwatch = new Stopwatch();
     public CoverageService() {}
 
-    public TotalCoverageData getTotalCoverageData()
-    {
+    public TotalCoverageData getTotalCoverageData() {
+      stopwatch.Reset();
+      stopwatch.Start();
       float prioAreaCov = 0.0f;
       float multiPrioAreaCov = 0.0f;
       float totalPrioArea = 0.0f;
@@ -26,7 +30,7 @@ public class CoverageService
       float totalPrivArea = 0.0f;
       CoverageBox2[] covBoxes = GameObject.FindObjectsOfType<CoverageBox2>();
       foreach (CoverageBox2 box in covBoxes) {
-        CoverageData boxCovData = box.GetComponent<CoverageBox2>().getCoverageData();
+        CoverageData boxCovData = box.getCoverageData();
         if (box.type == CoverageBox2.CoverageType.Cover) {
           prioAreaCov += boxCovData.AreaCovered;
           multiPrioAreaCov += boxCovData.AreaMultiCovered;
@@ -56,10 +60,20 @@ public class CoverageService
       covData.PrivacyCoverage = totalPrivCoverage;
       covData.AvgCamDistance = totalCamDistanceAvg / countPriorityAreas;
       covData.Score = this.calculateScore(covData);
+      stopwatch.Stop();
+      LogService.sumGenCalcCovTime += stopwatch.ElapsedMilliseconds;
+      LogService.contCalcCovCalls++;
       return covData;
     }
-
+    
     private float calculateScore(TotalCoverageData covData) {
-      return (covData.MultiPriorityCoverage * 0.2f + covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
+      return (covData.MultiPriorityCoverage * Constants.WEIGHT_MULTI_PRIO + covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
+    }
+
+    public void resetCullingInfo() {
+      CoverageBox2[] covBoxes = GameObject.FindObjectsOfType<CoverageBox2>();
+      foreach (CoverageBox2 box in covBoxes) {
+        box.resetCullingInfo();
+      }
     }
 }

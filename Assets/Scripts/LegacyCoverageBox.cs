@@ -25,8 +25,7 @@ public class CoverageBox : MonoBehaviour
 
   }
 
-  private void Start()
-  {
+  private void Start() {
     Debug.Log($"CAMERAS COUNT: {Camera.allCamerasCount}");
     this.groups = new CullingGroup[Camera.allCamerasCount];
 
@@ -41,8 +40,7 @@ public class CoverageBox : MonoBehaviour
 
 
     this.spheres = new BoundingSphere[width * height * depth];
-    for (int x = 0; x < width; ++x)
-    {
+    for (int x = 0; x < width; ++x) {
       for (int y = 0; y < height; ++y)
       {
 
@@ -68,20 +66,18 @@ public class CoverageBox : MonoBehaviour
     }
   }
 
-  private void Update()
-  {
+  private void Update() {
 
   }
-  private void OnDestroy()
-  {
+
+  private void OnDestroy() {
     for (int i = 0; i < this.groups.Length; i++) {
       this.groups[0].Dispose();
       this.groups[0] = null;
     }
   }
 
-  private void OnDrawGizmos()
-  {
+  private void OnDrawGizmos() {
     if (!Constants.DRAW_GISMOS) return;
     if (this.spheres is not null)
     {
@@ -104,8 +100,7 @@ public class CoverageBox : MonoBehaviour
     }
   }
 
-  public void setType(CoverageType type)
-  {
+  public void setType(CoverageType type) {
     this.renderer = GetComponent<MeshRenderer>();
     switch (type)
     {

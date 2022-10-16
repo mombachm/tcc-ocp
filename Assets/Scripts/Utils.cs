@@ -4,6 +4,7 @@ using UnityEngine;
 public class Utils
 {
   public static string[] objToEnableColliders = new string[2] {"group_20", "group_27"}; 
+  public static string[] objToDisableColliders = new string[1] {"group_160"}; 
 
   public static T findInactiveObj<T>() where T : Component {
     T[] objects = GameObject.FindObjectsOfType<T>(true);
@@ -17,9 +18,8 @@ public class Utils
     return null;
   }
 
-  public static void disableGlassColliders() {
+  public static void initializeColliders() {
     var objs = UnityEngine.Object.FindObjectsOfType<GameObject>();
-    Debug.Log($"OBJS: {objs.Length}");
     foreach (var obj in objs) {
       Renderer renderer = obj.GetComponent<Renderer>();      
       if (renderer) {
@@ -30,6 +30,9 @@ public class Utils
           if (collider) collider.enabled = false;
           foreach (var objName in objToEnableColliders){
             if(obj.name == objName) collider.enabled = true;
+          }
+          foreach (var objName in objToDisableColliders){
+            if(obj.name == objName) collider.enabled = false;
           }
         }
       }

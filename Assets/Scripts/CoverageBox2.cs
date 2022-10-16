@@ -1,5 +1,10 @@
 using UnityEngine;
 using System.Linq;
+using System.Collections.Generic;
+using System.Collections;
+using System.Threading;
+using System.Threading.Tasks;
+
 public class Cell {
   public Cell (Vector3 position, float radius) {
     this.Position = position;
@@ -30,11 +35,13 @@ public class CoverageBox2 : MonoBehaviour
   private Cell[] cells;
   private float[] camDistances;
   private int[] camVisibleCount;
+  private bool[] isRenderedByCam;
   private Bounds bounds;
   private int width;
   private int height;
   private int depth;
   private float cellDiameter;
+  private int camCount;
 
   public enum CoverageType
   {
@@ -56,18 +63,11 @@ public class CoverageBox2 : MonoBehaviour
     bounds = renderer.bounds;
 
     this.updateDimensions();
-
-    for (int i = 0; i < Camera.allCamerasCount; i++) {
-      Camera camera = Camera.allCameras[i];
-      var camController = camera.GetComponent<CameraController>();
-      camController.setCamIndex(i);
-    }
-    this.camDistances = new float[Camera.allCamerasCount];
-    this.camVisibleCount = new int[Camera.allCamerasCount];
   }
 
   private void Update()
   {
+    // Debug.Log($"VISIBLE: {this.renderer.isVisible}");
     if (this.cellDensity != Constants.CELLS_DENSITY) {
       this.cellDensity = Constants.CELLS_DENSITY;
       this.updateDimensions();
@@ -91,21 +91,33 @@ public class CoverageBox2 : MonoBehaviour
     if (this.cells is null) return;
     this.verifyCoverageWithRayCasting();
     // var cellSize = new Vector3(cellDiameter, cellDiameter, cellDiameter);
-    for (int x = 0; x < width * height * depth; ++x) {
-      //for (int i = 0; i < Camera.allCamerasCount; i++) {
-          // Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
-          if (this.cells[x].Visible) {
-              Gizmos.color = Color.green;
-              //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
-              Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
-          } else {
-              Gizmos.color = Color.red;
-              //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
-              Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
-          }
-        // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
-      //}
+    // for (int x = 0; x < width * height * depth; ++x) {
+    //   //for (int i = 0; i < Camera.allCamerasCount; i++) {
+    //       // Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
+    //       if (this.cells[x].Visible) {
+    //           Gizmos.color = Color.green;
+    //           //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
+    //           Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
+    //       } else {
+    //           Gizmos.color = Color.red;
+    //           //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
+    //           Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
+    //       }
+    //     // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
+    //   //}
+    // }
+  }
+
+  public void initCamData() {
+    this.camCount = Constants.CAM_COUNT;
+    for (int i = 0; i < Camera.allCamerasCount; i++) {
+      Camera camera = Camera.allCameras[i];
+      var camController = camera.GetComponent<CameraController>();
+      camController.setCamIndex(i);
     }
+    this.camDistances = new float[Camera.allCamerasCount];
+    this.isRenderedByCam = new bool[Camera.allCamerasCount];
+    this.camVisibleCount = new int[Camera.allCamerasCount];
   }
 
   private void updateDimensions() {
@@ -131,41 +143,63 @@ public class CoverageBox2 : MonoBehaviour
 
   private void verifyCoverageWithRayCasting() {
     if (this.cells is null) return;
+    if (!this.renderer.isVisible) return;
     for (int x = 0; x < width * height * depth; x++) {
       this.cells[x].Visible = false;
       this.cells[x].VisibleCount = 0;
     }
-    if (!this.renderer.isVisible) return;
+
     this.covCollider.enabled = true;
     for (int i = 0; i < Camera.allCamerasCount; i++) {
       this.camDistances[i] = 0;
       this.camVisibleCount[i] = 0;
-      for (int x = 0; x < width * height * depth; x++) {
-        Vector3 direction = this.cells[x].Position - Camera.allCameras[i].transform.position;
-        bool isCellInFrustrum = IsCellVisibleFromCam(this.cells[x], Camera.allCameras[i]);
-        if (isCellInFrustrum) {
-          if (Physics.Raycast(Camera.allCameras[i].transform.position, direction, out var raycastHit)) {
-          //Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
-            if (raycastHit.collider.gameObject == this.gameObject) {
-                this.cells[x].Visible = true;
-                this.cells[x].VisibleCount = this.cells[x].VisibleCount + 1;
-                this.camDistances[i] += raycastHit.distance;
-                this.camVisibleCount[i]++;
+      var cameraPlanes = GeometryUtility.CalculateFrustumPlanes(Camera.allCameras[i]);
+      if (this.isRenderedByCam[Camera.allCameras[i].GetComponent<CameraController>().index]) {
+        if (this.IsObjInFrustrum(cameraPlanes)) {
+          for (int x = 0; x < width * height * depth; x++) {
+            Vector3 direction = this.cells[x].Position - Camera.allCameras[i].transform.position;
+            bool isCellInFrustrum = IsCellInFrustrum(this.cells[x], cameraPlanes);
+            if (isCellInFrustrum) {
+              if (Physics.Raycast(Camera.allCameras[i].transform.position, direction, out var raycastHit)) {
+                // Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
+                if (raycastHit.collider.gameObject == this.gameObject) {
+                    this.cells[x].Visible = true;
+                    this.cells[x].VisibleCount = this.cells[x].VisibleCount + 1;
+                    this.camDistances[i] += raycastHit.distance;
+                    this.camVisibleCount[i]++;
+                }
+              }
             }
           }
-        }
-        // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
+        } 
       }
     }
     this.covCollider.enabled = false;
   }
 
-  public bool IsCellVisibleFromCam(Cell cell, Camera camera)
-  {
-      Plane[] planes = GeometryUtility.CalculateFrustumPlanes(camera);
-      return GeometryUtility.TestPlanesAABB(planes, new Bounds(cell.Position, new Vector3(cell.Radius, cell.Radius, cell.Radius)));
+  void OnWillRenderObject() {
+    if (isRenderedByCam is null) return;
+    if (Camera.current.name == "SceneCamera") return;
+    CameraController camController = Camera.current.GetComponent<CameraController>();
+    if (camController is null) return;
+    isRenderedByCam[camController.index] = true;
+  }
+
+  public bool IsCellInFrustrum(Cell cell, Plane[] cameraPlanes) {
+    return GeometryUtility.TestPlanesAABB(cameraPlanes, new Bounds(cell.Position, new Vector3(cell.Radius, cell.Radius, cell.Radius)));
+  }
+
+  public bool IsObjInFrustrum(Plane[] cameraPlanes) {
+    return GeometryUtility.TestPlanesAABB(cameraPlanes, this.bounds);
   }
  
+  public void resetCullingInfo() {
+    this.isRenderedByCam = new bool[Camera.allCamerasCount];
+    for (int i = 0; i < isRenderedByCam.Length; i++) {
+      isRenderedByCam[i] = false;
+    }
+  }
+
   public void setType(CoverageType type)
   {
     this.renderer = GetComponent<MeshRenderer>();
@@ -182,7 +216,7 @@ public class CoverageBox2 : MonoBehaviour
   }
 
   public CoverageData getCoverageData() {
-    this.verifyCoverageWithRayCasting();
+    verifyCoverageWithRayCasting();
     CoverageData covData = new CoverageData();
     float avgCamDistance = this.getAverageDistanceToCam();
     float totalArea = this.getTotalArea();
@@ -194,6 +228,7 @@ public class CoverageBox2 : MonoBehaviour
     covData.AreaMultiCovered = (multiCoverage * totalArea) / 100f;
     covData.avgCamDistance = avgCamDistance;
     covData.TotalArea = totalArea;
+    // Debug.Log( $"SCORE: {covData.Coverage}");
     return covData;
   }
 

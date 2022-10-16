@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,8 +12,7 @@ public class MyWindow : EditorWindow
         EditorWindow.GetWindow(typeof(MyWindow));
     }
     
-    void OnGUI()
-    {
+    void OnGUI() {
         this.startBaseObjects();
 
         GUILayout.Label ("OCP Settings", EditorStyles.boldLabel);
@@ -26,8 +26,12 @@ public class MyWindow : EditorWindow
             this.createCoverageArea();
         }
         if(GUILayout.Button(text: "Start GA")) {
-            var ga = GameObject.FindObjectOfType<CoverageGA>();
-            ga.startGA();
+          var ga = GameObject.FindObjectOfType<CoverageGA>();
+          if (Constants.TEST_ROUTINE) {
+            ga.testRoutineW();
+          } else {
+            ga.startGARoutine();
+          }
         }
         if(GUILayout.Button(text: "Stop GA")) {
             var ga = GameObject.FindObjectOfType<CoverageGA>();
@@ -37,6 +41,17 @@ public class MyWindow : EditorWindow
             var ga = GameObject.FindObjectOfType<CoverageGA>();
             ga.setBestChromosomeInScene();
         }
+        if(GUILayout.Button(text: "Capture cameras")) {
+          var testName = Constants.testName;
+          Constants.testName = "Manually Capture";
+          var ga = GameObject.FindObjectOfType<CoverageGA>();
+          ga.captureCameraImages();
+          //Constants.testName = testName;
+        }
+        if(GUILayout.Button(text: "Rando Position cameras")) {
+          var ga = GameObject.FindObjectOfType<CoverageGA>();
+          ga.cameraConfigService.randomPositionCameras();
+        }
         if(GUILayout.Button("Total Score")) {
           TotalCoverageData totalCovData = MainController.getTotalCoverageData();
           Debug.Log($"COV SCORE: {totalCovData.Score} / AVG DISTANCE: {totalCovData.AvgCamDistance}");
@@ -44,14 +59,17 @@ public class MyWindow : EditorWindow
           Debug.Log($"COV MULTI PRIO: {totalCovData.MultiPriorityCoverage}");
           Debug.Log($"COV PRIV: {totalCovData.PrivacyCoverage}");
         }
+        Constants.TEST_ROUTINE = EditorGUILayout.Toggle("Test Routine", Constants.TEST_ROUTINE);
         Constants.DRAW_GISMOS = EditorGUILayout.Toggle("Draw Coverage", Constants.DRAW_GISMOS);
         Constants.SHOW_COV_AREAS = EditorGUILayout.Toggle("Show/Hide Coverage Areas", Constants.SHOW_COV_AREAS);
         Constants.SHOW_PRIV_AREAS = EditorGUILayout.Toggle("Show/Hide Privacy Areas", Constants.SHOW_PRIV_AREAS);
         Constants.SHOW_CAM_AREAS = EditorGUILayout.Toggle("Show/Hide Camera Areas", Constants.SHOW_CAM_AREAS);
+        Constants.CAM_COUNT = int.Parse(EditorGUILayout.TextField ("Cam Count", Constants.CAM_COUNT.ToString()));
         Constants.CELLS_DENSITY = int.Parse(EditorGUILayout.TextField ("Cells Density", Constants.CELLS_DENSITY.ToString()));
         Constants.CAM_CELLS_DENSITY = int.Parse(EditorGUILayout.TextField ("Cam Cells Density", Constants.CAM_CELLS_DENSITY.ToString()));
         Constants.WEIGHT_PRIV = float.Parse(EditorGUILayout.TextField ("W - Avoid Areas", Constants.WEIGHT_PRIV.ToString()));
         Constants.WEIGHT_PRI0 = float.Parse(EditorGUILayout.TextField ("W - Priority Areas", Constants.WEIGHT_PRI0.ToString()));
+        Constants.WEIGHT_MULTI_PRIO = float.Parse(EditorGUILayout.TextField ("W - Multi Cam Cov Priority Areas", Constants.WEIGHT_MULTI_PRIO.ToString()));
         // groupEnabled = EditorGUILayout.BeginToggleGroup ("Optional Settings", groupEnabled);
         //     myBool = EditorGUILayout.Toggle ("Toggle", myBool);
         //     myFloat = EditorGUILayout.Slider ("Slider", myFloat, -3, 3);

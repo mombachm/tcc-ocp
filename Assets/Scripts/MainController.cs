@@ -1,7 +1,7 @@
+using System.Threading.Tasks;
 using UnityEngine;
 
-public class MainController
-{
+public class MainController {
     static CoverageService coverageService = new CoverageService();
 
     public static TotalCoverageData getTotalCoverageData() {

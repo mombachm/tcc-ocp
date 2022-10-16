@@ -5,7 +5,7 @@ public class CameraConfigService
 {
     const int MIN_PAN = 0;
     const int MAX_PAN = 359;
-    const int MIN_TILT = 10;
+    const int MIN_TILT = 30;
     const int MAX_TILT = 70;
     const int ANGLE_STEP = 1;
 
@@ -29,19 +29,48 @@ public class CameraConfigService
     }
 
     public void instantiateCameras(int cameraCount) {
+      foreach (var cam in Camera.allCameras) {
+        CameraController camController = cam.GetComponent<CameraController>();
+        camController.destroy();
+      }
       for (int i = 0; i < cameraCount; i++) {        
-        // CameraController newCam = Object.Instantiate(Camera.main.GetComponent<CameraController>(),  new Vector3(0, 0, 0), Quaternion.identity);
         var cameraGameObject = new GameObject( $"GA cam {i}" );
         cameraGameObject.gameObject.SetActive(true);
         var newCam = cameraGameObject.AddComponent<Camera>();
         newCam.gameObject.AddComponent<CameraController>();
         newCam.nearClipPlane = 0.01f;
-        //newCam.usePhysicalProperties = true;
         newCam.fieldOfView = Camera.HorizontalToVerticalFieldOfView(90, 16/9);
         newCam.gateFit = Camera.GateFitMode.None;
         newCam.useOcclusionCulling = true;
         newCam.targetDisplay = i;
       }
-      // Camera.main.enabled = false;
+      CoverageBox2[] covBoxes = GameObject.FindObjectsOfType<CoverageBox2>();
+      foreach (CoverageBox2 box in covBoxes) {
+        box.initCamData();
+      }
+    }
+
+    public void randomPositionCameras() {
+      foreach (var cam in Camera.allCameras) {
+        CameraController camController = cam.GetComponent<CameraController>();
+        var positions = new CameraAreaService().getAllPossiblePositions();
+        var tiltAngles = this.getTiltAngles();
+        var panAngles = this.getPanAngles();
+        var randPosIndex = Random.Range(0, positions.Length - 1);
+        var randTiltIndex = Random.Range(0, tiltAngles.Length - 1);
+        var randPanIndex = Random.Range(0, panAngles.Length - 1);
+        Debug.Log($"RANDOM INDEXES: {randPosIndex} {randTiltIndex} {randPanIndex}");
+        Debug.Log($"RANDOM VALUES: {positions[randPosIndex].ToString()} {tiltAngles[randTiltIndex].ToString()} {panAngles[randPanIndex].ToString()}");
+        camController.transform.position = positions[randPosIndex];
+        camController.transform.rotation = Quaternion.Euler((float)tiltAngles[randTiltIndex], (float)panAngles[randPanIndex], 0);
+      }
+    }
+
+    public bool checkCamerasState() {
+      foreach (var cam in Camera.allCameras) {
+        CameraController camController = cam.GetComponent<CameraController>();
+        if(!camController.hasChanged) return false;
+      }
+      return true;
     }
 }
