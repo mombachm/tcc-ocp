@@ -17,5 +17,5 @@ public class Constants
   public static int CELLS_DENSITY = 2; // 1 = 1 / meter
   public static int CAM_CELLS_DENSITY = 4; // 1 = 1 / meter
   public static int CAM_COUNT = 1;
-  public static string testName = "DENS 1 - 7 CAMS - MULTICAM";
+  public static string testName = "DENS 3 - 7 CAMS - TEST TCC";
 }

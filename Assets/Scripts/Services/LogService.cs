@@ -38,6 +38,7 @@ public static class LogService
 
     private static void logBestCoverages(CoverageGA ga) {
       csv.AppendLine(value: string.Format("\nCAM COUNT;{0}", Constants.CAM_COUNT));  
+      csv.AppendLine(value: string.Format("\nPOPULATION;{0}", ga.populationGA));  
       csv.AppendLine(value: string.Format(format: "CELL DENSITY;{0}", Constants.CELLS_DENSITY));
       csv.AppendLine(value: string.Format(format: "W PRIO;{0}", Constants.WEIGHT_PRI0));   
       csv.AppendLine(value: string.Format(format: "W PRIV;{0}", Constants.WEIGHT_PRIV));   
@@ -64,9 +65,9 @@ public static class LogService
       generationData.Clear();
     }
     private static void logCameraPositions() {
-      csv.AppendLine(string.Format("\nCAM NAME;CAM POS")); 
+      csv.AppendLine(string.Format("\nCAM NAME;CAM POS;CAM ROT")); 
       foreach (var cam in Camera.allCameras) {
-        string newLine = string.Format("{0};{1}", cam.name, cam.transform.position.ToString());
+        string newLine = string.Format("{0};{1};{2}", cam.name, cam.transform.position.ToString(),cam.transform.rotation.ToString());
         csv.AppendLine(newLine);  
       }
     }

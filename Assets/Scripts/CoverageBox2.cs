@@ -31,7 +31,6 @@ public class CoverageBox2 : MonoBehaviour
   Collider covCollider;
   public CoverageType type;
   private int cellDensity;
-  private CullingGroup[] groups;
   private Cell[] cells;
   private float[] camDistances;
   private int[] camVisibleCount;
@@ -90,21 +89,37 @@ public class CoverageBox2 : MonoBehaviour
     if (!Constants.DRAW_GISMOS) return;
     if (this.cells is null) return;
     this.verifyCoverageWithRayCasting();
-    // var cellSize = new Vector3(cellDiameter, cellDiameter, cellDiameter);
-    // for (int x = 0; x < width * height * depth; ++x) {
-    //   //for (int i = 0; i < Camera.allCamerasCount; i++) {
-    //       // Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
-    //       if (this.cells[x].Visible) {
-    //           Gizmos.color = Color.green;
-    //           //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
-    //           Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
-    //       } else {
-    //           Gizmos.color = Color.red;
-    //           //Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
-    //           Gizmos.DrawWireSphere(this.cells[x].Position, cellDiameter/2);
-    //       }
-    //     // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
-    //   //}
+
+    var cellSize = new Vector3(cellDiameter-0.01f, cellDiameter-0.001f, cellDiameter-0.01f);
+    var cellSize2 = new Vector3(cellDiameter-0.02f, cellDiameter-0.02f, cellDiameter-0.02f);
+    var cellSize3 = new Vector3(cellDiameter-0.03f, cellDiameter-0.03f, cellDiameter-0.03f);
+    for (int x = 0; x < width * height * depth; ++x) {
+      //for (int i = 0; i < Camera.allCamerasCount; i++) {
+          // Debug.DrawRay(Camera.allCameras[i].transform.position, direction, Color.yellow);
+         if (this.cells[x].Visible) {
+              Gizmos.color = Color.green;
+          } else {
+              Gizmos.color = Color.red;            
+          }
+          Gizmos.DrawWireSphere(this.cells[x].Position, 0.1f / cellDensity);
+          Gizmos.DrawWireSphere(this.cells[x].Position, 0.12f / cellDensity);
+          Gizmos.DrawWireSphere(this.cells[x].Position, 0.13f / cellDensity);
+          // Gizmos.DrawWireCube(this.cells[x].Position, cellSize);
+          // Gizmos.DrawWireCube(this.cells[x].Position, cellSize2);
+          // Gizmos.DrawWireCube(this.cells[x].Position, cellSize3);
+        // UnityEditor.Handles.Label(this.cells[x].Position, $"{this.cells[x].VisibleCount}");
+      //}
+    }
+    // for (int i = 0; i < Camera.allCamerasCount; i++) {
+    //   Gizmos.color = Color.cyan;     
+    //   var cam = Camera.allCameras[i];
+    //   Gizmos.matrix = Matrix4x4.TRS(cam.transform.position, cam.transform.rotation, Vector3.one);
+    //   Gizmos.DrawFrustum(cam.transform.position,
+    //   cam.fieldOfView,
+    //   cam.nearClipPlane,
+    //   cam.farClipPlane,
+    //   cam.aspect
+    //   );
     // }
   }
 
@@ -154,7 +169,7 @@ public class CoverageBox2 : MonoBehaviour
       this.camDistances[i] = 0;
       this.camVisibleCount[i] = 0;
       var cameraPlanes = GeometryUtility.CalculateFrustumPlanes(Camera.allCameras[i]);
-      if (this.isRenderedByCam[Camera.allCameras[i].GetComponent<CameraController>().index]) {
+      // if (this.isRenderedByCam[Camera.allCameras[i].GetComponent<CameraController>().index]) {
         if (this.IsObjInFrustrum(cameraPlanes)) {
           for (int x = 0; x < width * height * depth; x++) {
             Vector3 direction = this.cells[x].Position - Camera.allCameras[i].transform.position;
@@ -172,7 +187,7 @@ public class CoverageBox2 : MonoBehaviour
             }
           }
         } 
-      }
+      // }
     }
     this.covCollider.enabled = false;
   }

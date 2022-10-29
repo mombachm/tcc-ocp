@@ -20,6 +20,7 @@ public class CoverageGA : MonoBehaviour {
   public const int testMaxCamCount = 15;
   public float testWPriv = 0;
   public const float testMaxWPriv = 1;
+  public int populationGA = 10;
   private CoverageService coverageService = new CoverageService();
 
   CameraChromosome chromosomeToEval;
@@ -90,8 +91,8 @@ public class CoverageGA : MonoBehaviour {
     var population = new Population (minSize: 100, maxSize: 100, chromosome);
 
     this.ga = new GeneticAlgorithm(population, this.fitness, selection, crossover, mutation);
-    this.ga.MutationProbability = 0.1f;
-    this.ga.Termination = new GenerationNumberTermination(100); //new FitnessStagnationTermination(15); //new GenerationNumberTermination(expectedGenerationNumber: 3);
+    this.ga.MutationProbability = 0.2f;
+    this.ga.Termination = new FitnessStagnationTermination(15);//new GenerationNumberTermination(150); //new FitnessStagnationTermination(15); //new GenerationNumberTermination(expectedGenerationNumber: 3);
     // new FitnessThresholdTermination(100);//new GenerationNumberTermination(20);
     this.ga.GenerationRan += delegate {
       var bestChromo = ((CameraChromosome)this.ga.Population.CurrentGeneration.BestChromosome);
@@ -106,6 +107,7 @@ public class CoverageGA : MonoBehaviour {
       Debug.Log($"AVG TIME: {generationData.avgTimeCalcCoverage} / SUM: {LogService.sumGenCalcCovTime} / CONT: {LogService.contCalcCovCalls}");
       LogService.resetTimeCalcCov();
       LogService.generationData.Add(generationData);
+
     };
   }
 
@@ -256,9 +258,11 @@ public class CoverageGA : MonoBehaviour {
 
   public void testRoutineW() {
     stopGA();
-    if (this.testWPriv > testMaxWPriv + 0.1f) return;
-    Constants.WEIGHT_MULTI_PRIO = this.testWPriv;
+    if (this.populationGA > 150) return;
+    // Constants.WEIGHT_PRIV = this.testWPriv;
+
+      Debug.Log($"POPULATION: {this.populationGA}");
     StartCoroutine(startGA());
-    this.testWPriv = this.testWPriv + 0.1f;
+    this.populationGA = this.populationGA + 10;
   }
 }

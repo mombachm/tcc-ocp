@@ -67,7 +67,9 @@ public class CoverageService
     }
     
     private float calculateScore(TotalCoverageData covData) {
-      return (covData.MultiPriorityCoverage * Constants.WEIGHT_MULTI_PRIO + covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
+      var score = (covData.MultiPriorityCoverage * Constants.WEIGHT_MULTI_PRIO + covData.PriorityCoverage * Constants.WEIGHT_PRI0) - (covData.PrivacyCoverage * Constants.WEIGHT_PRIV);
+      if (covData.PrivacyCoverage < 0) return 0;
+      return score;
     }
 
     public void resetCullingInfo() {
